@@ -35,6 +35,40 @@ nav button{flex:1;background:none;color:var(--mut);font-size:13px;padding:6px 2p
 .card{box-shadow:0 2px 10px rgba(11,74,61,.06)}.hero{background:var(--g);color:#f6f1e3;border:0;border-radius:24px}.hero .big,.hero small{color:#f6f1e3}.hero .big{font-size:38px}
 .wm{display:flex;align-items:center;gap:6px;justify-content:flex-end;padding:3px 12px;font-size:11px;color:#4d6a60;background:#cfc9b6}.wm img{width:14px;height:14px}
 details summary{cursor:pointer;color:var(--g)}
+
+/* ===== Aven theme v2 (presentation only) ===== */
+:root{--bg:#f3eee2;--card:#fbf8f1;--ink:#26413a;--mut:#74857d;--g:#0b4a3d;--sage:#6f9f80;--sage-l:#e3ebdd;--cream:#efe9db;--line:#ece5d3;--warn:#b5765a;--sh:0 1px 2px rgba(11,74,61,.04),0 8px 24px rgba(11,74,61,.07)}
+body{background:var(--bg);font:16px/1.65 Verdana,"Trebuchet MS",sans-serif;letter-spacing:.015em;-webkit-font-smoothing:antialiased}
+main{padding:8px 16px 140px}
+header{padding:14px 2px 16px;gap:12px}header img{width:46px;height:46px;border-radius:14px;box-shadow:var(--sh)}header b{font-size:26px;letter-spacing:.02em}
+section.on{animation:fi .3s ease}@keyframes fi{from{opacity:0;transform:translateY(8px)}}
+.card{border:0;border-radius:22px;padding:18px;margin:0 0 16px;box-shadow:var(--sh);background:var(--card)}
+h3{font-size:16px;font-weight:700;color:var(--g);margin:0 0 10px}
+.big{font-weight:700}small,.m{color:var(--mut)}
+.row{padding:12px 0;border-bottom:1px solid var(--line)}
+button{border-radius:16px;min-height:44px;font-weight:600;background:var(--g);box-shadow:0 2px 8px rgba(11,74,61,.16);transition:transform .12s,background .2s}
+button:active{transform:scale(.97)}
+button.s{background:var(--sage-l);color:var(--g);box-shadow:none}
+button.t{min-height:34px;border-radius:999px;padding:5px 14px;font-size:13px;box-shadow:none;background:var(--sage-l);color:var(--g)}
+input,select,textarea{background:#fffdf8;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--sage);box-shadow:0 0 0 4px rgba(111,159,128,.2)}
+nav{left:14px;right:14px;bottom:calc(10px + env(safe-area-inset-bottom));border:0;border-radius:26px;padding:6px;background:rgba(251,248,241,.95);box-shadow:0 10px 30px rgba(11,74,61,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+nav button{background:none;box-shadow:none;color:var(--mut);border-radius:20px;min-height:54px;font-size:11px;padding:6px 2px}
+nav button span{display:block;font-size:0}nav button svg{width:22px;height:22px;display:block;margin:0 auto 2px}
+nav button.on{color:var(--g);background:var(--sage-l)}
+.hero{background:linear-gradient(155deg,#12604d 0%,#0b4a3d 62%,#08382f 100%);border-radius:28px;padding:22px;position:relative;overflow:hidden;box-shadow:0 14px 34px rgba(11,74,61,.28)}
+.hero::after{content:"";position:absolute;right:-60px;top:-70px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(239,233,219,.2),rgba(239,233,219,0) 70%);pointer-events:none}
+.hero .big{font-size:40px}.k>div{border-radius:16px}
+.bar{height:12px;background:#e8d3c6;border-radius:8px}.bar i{background:var(--sage)}
+.pill{display:inline-block;padding:1px 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--sage-l);color:var(--g)}
+.pill.w{background:#f3e1d6;color:#8a4f37}.pill.o{background:#ecc9ba;color:#7a3d27}
+.ph{margin:2px 0 12px;padding:10px 14px;background:var(--cream);border-radius:14px}
+.ph .pr{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0}.ph .pr b{font-size:15px;color:var(--g)}
+.av{width:34px;height:34px;border-radius:50%;background:var(--sage-l);color:var(--g);display:inline-flex;align-items:center;justify-content:center;font-weight:700;margin-right:10px;vertical-align:middle}
+details.card summary{font-weight:700}
+.wm{background:var(--cream);color:var(--mut)}
+#sv{width:100%;margin-top:8px}
+@media (prefers-reduced-motion:reduce){section.on{animation:none}button{transition:none}}
 </style></head><body><main>
 <header><img src="logo.png" alt="Aven"><b>Aven</b></header>
 <section id="home" class="on"><div id="hv"></div>
@@ -96,6 +130,10 @@ let CUR=1,R=null,Z=1.6;
 // ===== Aven core v2: money is stored in whole sen (RM12.50 = 1250) =====
 const sen=x=>{const n=Math.round(num(x)*100);return Number.isFinite(n)&&n>0&&n<1e11?n:NaN};
 const ms=n=>(n<0?'-':'')+'RM'+(Math.abs(n)/100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+const fd=d=>{const p=String(d).split('-');if(p.length!=3)return d;return new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString(S.lang=='ms'?'ms-MY':'en-GB',{day:'numeric',month:'long',year:'numeric'})};
+const cd=n=>{const k=Math.round((new Date(n)-new Date(today()))/864e5);return k<0?['Overdue by '+(-k)+' day'+(k==-1?'':'s'),'o']:k==0?['Due today','w']:k==1?['Due tomorrow','w']:k<=3?['Due in '+k+' days','w']:['Due in '+k+' days','']};
+const NI={home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',exp:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',debts:'<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.2c3 .2 5 2.2 5 5.3"/>',commit:'<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/>',log:'<path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/>'};
+const ico=k=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+NI[k]+'</svg>';
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const addD=(d,n)=>{const x=new Date(d+'T00:00:00');x.setDate(x.getDate()+n);return iso(x)};
 const addF=(d,f)=>{const x=new Date(d+'T00:00:00');if(f=='weekly')x.setDate(x.getDate()+7);else{const m={monthly:1,'2m':2,quarterly:3,yearly:12}[f]||1,day=x.getDate();x.setMonth(x.getMonth()+m);if(x.getDate()<day)x.setDate(0)}return iso(x)};
@@ -126,10 +164,10 @@ return o.length?o.slice(0,4):[{t:'Nothing unusual noticed so far.'}]}
 // ---- Home
 function home(){const c=cash(),m=today().slice(0,7),E=live().filter(x=>x.t=='e'&&x.m>0&&x.d.slice(0,7)==m),by={};E.forEach(x=>by[x.c]=(by[x.c]||0)+x.m);
 const cs=Object.entries(by).sort((a,b)=>b[1]-a[1]),O=cs.reduce((a,b)=>a+b[1],0);let W=0,N=0;E.forEach(x=>{const q=wnOf(x);W+=q.w;N+=q.n});const ix=W+N?Math.round(W/(W+N)*100):null;
-const od=openD().filter(d=>d.dir=='in').reduce((a,d)=>a+owed(d),0),up=actC().sort((a,b)=>a.next<b.next?-1:1).slice(0,3),ins=insights(),rec=live().slice(-5).reverse();
+const od=openD().filter(d=>d.dir=='in').reduce((a,d)=>a+owed(d),0),up=actC().sort((a,b)=>a.next<b.next?-1:1).slice(0,5),ins=insights(),rec=live().slice(-5).reverse();
 const g=!S.payday?'Set your payday in Settings (below) to see a daily allowance.':c.tight?'Your available money may become tight before your next income.':c.dn==null?`About ${ms(c.daily)} a day until payday (an estimate; Aven learns your essentials after about 2 weeks of records).`:`Comfortable spending: about ${ms(c.daily)} a day for ${c.days} day${c.days==1?'':'s'}, after keeping about ${ms(c.dn)} a day for essentials (an estimate).`;
 $('#hv').innerHTML=`<div class="card hero"><small>Available to spend</small><div class="big">${ms(c.A)}</div><div class="k" style="margin:8px 0"><div style="background:rgba(255,255,255,.12);color:#f6f1e3"><small style="color:#f6f1e3">Actual balance</small><br><b>${ms(c.B)}</b></div><div style="background:rgba(255,255,255,.12);color:#f6f1e3"><small style="color:#f6f1e3">Reserved</small><br><b>${ms(c.Rs)}</b></div></div><p style="margin:0">${g}</p><small>${c.pay?'Next payday in '+c.days+' day'+(c.days==1?'':'s'):'No payday set'}</small></div>
-<div class="card"><h3>Coming up</h3>${up.map(x=>`<div class="row"><span class="g">${esc(x.name)}<br><small>due ${x.next}${x.next<today()?' (overdue)':''}</small></span><b>${ms(x.s)}</b></div>`).join('')||'<p class="m" style="margin:0">No commitments yet.</p>'}</div>
+<div class="card"><h3>Coming up</h3>${up.map(x=>{const c=cd(x.next);return `<div class="row"><span class="g">${esc(x.name)}<br><small>${fd(x.next)}</small> <span class="pill ${c[1]}">${c[0]}</span></span><b>${ms(x.s)}</b></div>`}).join('')||'<p class="m" style="margin:0">No commitments yet.</p>'}</div>
 <div class="card"><h3>Owed to you</h3><div class="big">${ms(od)}</div></div>
 <div class="card"><h3>What Aven noticed</h3>${ins.map(i=>`<p style="margin:0 0 8px">${esc(i.t)} ${i.rc?`<button class="t" data-rc="${esc(i.rc)}">Add commitment</button>`:''}</p>`).join('')}</div>
 <div class="card"><h3>Wants Index</h3>${ix==null?'<p class="m" style="margin:0">Not enough classified spending yet.</p>':`<div class="big">${ix} / 100</div><div class="bar"><i style="width:${100-ix}%"></i></div><small>Share of your own spending this month that was wants. Items marked “Check?” are left out.</small>`}</div>
@@ -157,11 +195,12 @@ else if(d.wn&&x){x.w=x.w=='n'?'w':x.w=='w'?'u':'n';sv();render()}};
 // ---- Debts
 let DP=[],DM='';
 function debtv(){const g={};S.debts.filter(d=>!d.void).forEach(d=>{const k=d.who.toLowerCase();(g[k]=g[k]||{name:d.who,ds:[]}).ds.push(d)});DP=Object.values(g);
+const hist=d=>d.reps.length?`<div class="ph"><small>Payment history</small>${d.reps.map(r=>`<div class="pr"><b>${ms(r.s)}</b><small>${r.d?fd(r.d):''}</small></div>`).join('')}<div class="pr"><small>Remaining</small><b>${ms(owed(d))}</b></div></div>`:'';
 const rn=d=>{const r=S.receipts.find(z=>z.id==d.rid);return r?'Receipt'+(r.store?' · '+esc(r.store):''):'Manual'},pay=(i,dir)=>`<div class="row" style="border:0"><input id="pa${dir}${i}" type="number" step="0.01" inputmode="decimal" placeholder="RM" style="flex:1"><button data-pa="${dir}:${i}">${dir=='in'?'They paid me':'I paid them'}</button></div>`;
 const cards=DP.map((p,i)=>{const I=p.ds.filter(d=>d.dir=='in').reduce((a,d)=>a+owed(d),0),O=p.ds.filter(d=>d.dir=='out').reduce((a,d)=>a+owed(d),0);if(!I&&!O)return'';const n=I-O;
-return `<div class="card"><h3>${esc(p.name)}</h3><p style="margin:0 0 6px"><b style="font-size:20px">${n>0?esc(p.name)+' owes you '+ms(n):n<0?'You owe '+esc(p.name)+' '+ms(-n):'All even'}</b></p>${I&&O?`<small>You are owed ${ms(I)} and you owe ${ms(O)}, shown as a net amount.</small>`:''}`+p.ds.filter(d=>owed(d)>0).map(d=>`<div class="row"><span class="g">${d.dir=='in'?'Owed to you':'You owe'} · ${rn(d)}<br><small>${d.created} · original ${ms(d.orig)} · ${d.reps.length?'Partially paid':'Outstanding'}</small></span><b>${ms(owed(d))}</b></div>`).join('')+(I?pay(i,'in'):'')+(O?pay(i,'out'):'')+'</div>'}).join('');
+return `<div class="card"><h3><span class="av">${esc(p.name.slice(0,1).toUpperCase())}</span>${esc(p.name)}</h3><p style="margin:0 0 6px"><b style="font-size:20px">${n>0?esc(p.name)+' owes you '+ms(n):n<0?'You owe '+esc(p.name)+' '+ms(-n):'All even'}</b></p>${I&&O?`<small>You are owed ${ms(I)} and you owe ${ms(O)}, shown as a net amount.</small>`:''}`+p.ds.filter(d=>owed(d)>0).map(d=>`<div class="row"><span class="g">${d.dir=='in'?'Owed to you':'You owe'} · ${rn(d)}<br><small>${fd(d.created)} · original ${ms(d.orig)} · ${d.reps.length?'Partially paid':'Outstanding'}</small></span><b>${ms(owed(d))}</b></div>${hist(d)}`).join('')+(I?pay(i,'in'):'')+(O?pay(i,'out'):'')+'</div>'}).join('');
 const st=S.debts.filter(d=>!d.void&&owed(d)<=0);
-$('#dv').innerHTML=(DM?`<p class="bad">${DM}</p>`:'')+(cards||`<div class="card"><p class="m" style="margin:0">${t('empty')}</p></div>`)+(st.length?`<details class="card"><summary>Settled (${st.length})</summary>${st.map(d=>`<div class="row"><span class="g">${esc(d.who)} · ${rn(d)}<br><small>settled ${d.settled||''}</small></span><b>${ms(d.orig)}</b></div>`).join('')}</details>`:'')}
+$('#dv').innerHTML=(DM?`<p class="bad">${DM}</p>`:'')+(cards||`<div class="card"><p class="m" style="margin:0">${t('empty')}</p></div>`)+(st.length?`<details class="card"><summary>Settled (${st.length})</summary>${st.map(d=>`<div class="row"><span class="g">${esc(d.who)} · ${rn(d)}<br><small>settled ${d.settled?fd(d.settled):''}</small></span><b>${ms(d.orig)}</b></div>${hist(d)}`).join('')}</details>`:'')}
 function repay(i,dir,amt){const p=DP[i],ds=p.ds.filter(d=>d.dir==dir&&owed(d)>0).sort((a,b)=>a.created<b.created?-1:1),tot=ds.reduce((a,d)=>a+owed(d),0);
 if(!Number.isFinite(amt)){DM='Enter a valid amount greater than RM0.';return debtv()}if(amt>tot){DM='That is more than the '+ms(tot)+' outstanding.';return debtv()}
 DM='';let left=amt;for(const d of ds){if(left<=0)break;const take=Math.min(left,owed(d)),tid=uid('t');S.tx.push({id:tid,d:today(),t:dir=='in'?'ri':'ro',s:take,m:0,c:'Hutang',n:(dir=='in'?'Repayment from ':'Repayment to ')+d.who,w:'n',did:d.id});d.reps.push({id:uid('r'),s:take,d:today(),tid});if(owed(d)==0)d.settled=today();left-=take}sv();render()}
@@ -361,7 +400,7 @@ const TUT={en:['1. Expenses → Camera: photograph a receipt (MR DIY, Giant, Lot
 ms:['1. Belanja → Kamera: ambil gambar resit.','2. Zum guna + / −. Pilih Orang 1–5, kemudian tekan baris untuk tanda warna. Tekan lagi untuk padam.','3. Tekan ✎ untuk betulkan jumlah. Kuantiti × harga seunit dibaca automatik.','4. Letak Cukai % jika belum termasuk. Taip jumlah resit untuk semak imbasan.','5. Tekan Resit. Barang yang tidak ditanda dikira milik anda. Sahkan dan simpan: bayaran penuh direkod sekali, dan setiap orang yang ditanda menjadi hutang kepada anda.','6. Keperluan vs Kehendak diagak daripada nama barang. Tekan label untuk tukar.','7. Hutang: tekan “They paid me” apabila dibayar. Komitmen: wang tersimpan kekal dalam akaun sehingga anda tekan Mark paid.']};
 function tut(){$('#tt').innerHTML=TUT[S.lang].map(x=>`<p>${x}</p>`).join('');$('#tut').classList.add('on')}$('#tutB').onclick=tut;$('#tx').onclick=()=>{$('#tut').classList.remove('on');S.seen=1;sv()};
 function tab(n){$$('section').forEach(s=>s.classList.toggle('on',s.id==n));$$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.n==n));scrollTo(0,0)}
-function render(){$$('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));$('#nav').innerHTML=[['home','🏡'],['exp','🧾'],['debts','🤝'],['commit','📌'],['log','📒']].map(a=>`<button data-n="${a[0]}" class="${$('#'+a[0]).classList.contains('on')?'on':''}"><span>${a[1]}</span>${t(a[0])}</button>`).join('');home();logv();debtv();commv()}
+function render(){$$('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));$('#nav').innerHTML=['home','exp','debts','commit','log'].map(a=>`<button data-n="${a}" class="${$('#'+a).classList.contains('on')?'on':''}"><span>${ico(a)}</span>${t(a)}</button>`).join('');home();logv();debtv();commv()}
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)tab(b.dataset.n)};$('#lang').value=S.lang;$('#pd').value=S.payday||'';$('#lang').onchange=e=>{S.lang=e.target.value;sv();render()};
 render();if(!S.seen)tut();if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
 </script></body></html>
