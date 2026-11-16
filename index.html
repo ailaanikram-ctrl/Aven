@@ -68,16 +68,18 @@ nav button.on{color:var(--g);background:var(--sage-l)}
 details.card summary{font-weight:700}
 .wm{background:var(--cream);color:var(--mut)}
 #sv{width:100%;margin-top:8px}
+.cl{margin-left:auto;font-size:12px;color:var(--mut);font-weight:600}.cl.ok{color:var(--g)}.cl.err{color:var(--warn)}
 @media (prefers-reduced-motion:reduce){section.on{animation:none}button{transition:none}}
 </style></head><body><main>
-<header><img src="logo.png" alt="Aven"><b>Aven</b></header>
+<header><img src="logo.png" alt="Aven"><b>Aven</b><span id="cl" class="cl"></span></header>
 <section id="home" class="on"><div id="hv"></div>
+<div class="card" id="cloud"></div>
 <div class="card"><h3 data-t="set"></h3><label class="m" data-t="lang"></label><select id="lang"><option value="en">English</option><option value="ms">Bahasa Melayu</option></select>
 <div class="bt"><button class="s" id="csvS" data-t="csvS"></button><button class="s" id="csvP" data-t="csvP"></button></div><div class="bt" style="margin-top:8px"><button class="s" id="tutB" data-t="tut"></button></div>
 <label class="m">Payday (day of month)</label><input id="pd" type="number" min="1" max="31" inputmode="numeric">
 <label class="m">My current balance (RM)</label><div class="row" style="border:0"><input id="bl" type="number" step="0.01" inputmode="decimal" placeholder="e.g. 2000.00"><button id="bls" class="s">Set</button></div>
 <div class="bt"><button class="s" id="bk1">Save backup</button><button class="s" id="bk2">Restore backup</button></div><input id="bkf" type="file" accept="application/json,.json" hidden><p id="bkm" class="m"></p>
-<small>Your records live only in this browser. Clearing site data erases them, so save a backup now and then.</small></div></section>
+<small>Your records are kept on this phone. If you clear site data they are erased here, but with Cloud backup signed in you can restore them. “Save backup” makes a file copy as an extra.</small></div></section>
 <section id="exp"><div class="card"><h3 data-t="scan"></h3><p class="m" data-t="scanH"></p><div class="bt"><button id="cam" data-t="cam"></button><button class="s" id="gal" data-t="gal"></button></div>
 <input id="fc" type="file" accept="image/*" capture="environment" hidden><input id="fg" type="file" accept="image/*" hidden></div>
 <div class="card"><h3 data-t="paste"></h3><select id="ty"><option value="auto">Auto</option><option value="e" data-t="oE"></option><option value="i" data-t="oI"></option><option value="d" data-t="oD"></option><option value="l">I lent money</option></select>
@@ -103,7 +105,7 @@ if(o&&((o.tx||[]).length||(o.debts||[]).length)){localStorage.aven_v1_backup=JSO
 (o.tx||[]).forEach(x=>{const s=Math.round((+x.a||0)*100);if(!(s>0))return;const li=x.c=='Hutang'&&x.t=='i',ro=x.c=='Hutang'&&x.t=='e';n.tx.push({id:uid('t'),d:x.d||today(),t:li?'li':ro?'ro':x.t=='i'?'i':'e',s,m:(x.t=='e'&&!ro)?s:0,c:x.c||'Lain-lain',n:x.n||'',w:x.w||'n'})});
 (o.debts||[]).forEach(d=>{const s=Math.round((+d.amt||0)*100);if(s>0)n.debts.push({id:uid('d'),who:d.name,dir:'out',orig:s,reps:[],created:today()})})}
 return n})();
-const sv=()=>{try{localStorage.aven=JSON.stringify(S)}catch(e){alert('Aven could not save. Your browser storage may be full. Please save a backup.')}};
+const sv=()=>{try{localStorage.aven=JSON.stringify(S)}catch(e){alert('Aven could not save. Your browser storage may be full. Please save a backup.')}if(window.cloudQ)window.cloudQ()};
 const t=k=>L[S.lang][k]||k,rm=n=>'RM'+(+n).toFixed(2),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')},num=s=>parseFloat(String(s).replace(',','.'));
 const CAT=[['Makanan','🍜',/nasi|\bmee\b|mamak|makan|lunch|dinner|breakfast|kopi|roti canai|\bteh\b|food|foodpanda|restoran|kfc|mcd|sate|ayam/i,'n'],
@@ -403,4 +405,73 @@ function tab(n){$$('section').forEach(s=>s.classList.toggle('on',s.id==n));$$('#
 function render(){$$('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));$('#nav').innerHTML=['home','exp','debts','commit','log'].map(a=>`<button data-n="${a}" class="${$('#'+a).classList.contains('on')?'on':''}"><span>${ico(a)}</span>${t(a)}</button>`).join('');home();logv();debtv();commv()}
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)tab(b.dataset.n)};$('#lang').value=S.lang;$('#pd').value=S.payday||'';$('#lang').onchange=e=>{S.lang=e.target.value;sv();render()};
 render();if(!S.seen)tut();if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
-</script></body></html>
+</script><script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+(function(){
+const cfg=window.AVEN_CLOUD||{},cfgOk=!!(cfg.url&&cfg.key&&!/YOUR/i.test(cfg.url+cfg.key)),libOk=!!(window.supabase&&window.supabase.createClient);
+const DEV=localStorage.aven_dev||(localStorage.aven_dev=uid('dv'));
+const gy=()=>{try{return JSON.parse(localStorage.aven_sync||'{}')}catch(e){return{}}},sy=o=>{localStorage.aven_sync=JSON.stringify(o)};
+const CL=window.CL={st:!cfgOk?'off':!libOk?'nolib':'out',s:'ok',msg:'',bad:0,user:null,busy:0,ver:0,applying:0,ready:0,conf:null,sent:0,snaps:null,rrc:0,rec:0,email:''};
+let sb=null,T=null,RT=null;
+const cn=o=>o===null?'null':Array.isArray(o)?'['+o.map(x=>x===undefined?'null':cn(x)).join(',')+']':typeof o=='object'?'{'+Object.keys(o).filter(k=>o[k]!==undefined).sort().map(k=>JSON.stringify(k)+':'+cn(o[k])).join(',')+'}':JSON.stringify(o);
+const emp=o=>!((o.tx&&o.tx.length)||(o.debts&&o.debts.length)||(o.commits&&o.commits.length)||(o.receipts&&o.receipts.length)||o.open);
+const okd=o=>o&&o.v==2&&Array.isArray(o.tx)&&Array.isArray(o.debts)&&Array.isArray(o.commits)&&Array.isArray(o.receipts);
+const tm=()=>new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),dt=x=>new Date(x).toLocaleString([],{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+function ui(){const el=document.getElementById('cloud'),ch=document.getElementById('cl');if(!el)return;
+let h='<h3>Cloud backup</h3>',chip='',cc='cl';
+if(CL.st=='off')h+='<p class="m" style="margin:0">Not set up yet. Add your Supabase details to config.js to turn on automatic backup. Until then your data is saved on this phone only.</p>';
+else if(CL.st=='nolib')h+='<p class="m" style="margin:0">The cloud library could not load. Check your internet connection, then reopen Aven.</p>';
+else if(!CL.user){chip='Local only';h+=`<p class="m" style="margin:0 0 8px">Sign in with your email. Aven then backs up automatically whenever you add or change something.</p><input id="ce" type="email" autocomplete="email" placeholder="you@email.com" value="${esc(CL.email)}"><button data-cs="1" style="width:100%">${CL.sent?'Send a new code':'Send me a code'}</button>`+(CL.sent?`<input id="cc" inputmode="numeric" autocomplete="one-time-code" placeholder="Code from your email"><button data-cv="1" style="width:100%">Sign in</button>`:'')}
+else{const y=gy();chip=CL.conf?'Needs your choice':CL.s=='ok'?'Backed up ✓':CL.s=='busy'?'Backing up…':CL.s=='err'?'Backup failed':'Waiting to back up';cc+=CL.s=='ok'&&!CL.conf?' ok':CL.s=='err'||CL.conf?' err':'';
+h+=`<p style="margin:0 0 8px">Signed in as <b>${esc(CL.user.email||'')}</b></p>`;
+if(CL.conf){const r=CL.conf;h+=`<div class="ph" style="background:#f3e1d6"><b>This phone and your cloud backup are different.</b><p style="margin:6px 0">Cloud copy: ${r.data.tx.length} transactions, saved ${esc(dt(r.updated_at))}.<br>This phone: ${S.tx.length} transactions.</p>${y.uid&&y.uid!==CL.user.id?'<p style="margin:6px 0"><b>This phone’s data belongs to a different account.</b></p>':''}<small>Choose which to keep. Older cloud snapshots are not deleted. This phone’s current data is also kept as a safety copy.</small></div><div class="bt" style="margin-top:8px"><button data-cu="1">Use cloud copy</button><button class="s" data-ck="1">Keep this phone’s data</button></div>`}
+else{h+=`<div class="bt"><button class="s" data-bn="1">Back up now</button><button class="s" data-rl="1">Restore…</button><button class="s" data-so="1">Sign out</button></div>`;
+if(CL.snaps)h+=CL.snaps.length?`<select id="cs">${CL.snaps.map(x=>`<option value="${x.id}"${String(x.id)==String(CL.sel)?' selected':''}>${esc(dt(x.updated_at))}</option>`).join('')}</select><button data-rr="1" style="width:100%">${CL.rrc?'Tap again to replace this phone’s data':'Restore selected snapshot'}</button>`:'<p class="m">No cloud backups yet.</p>'}}
+if(CL.msg)h+=`<p class="${CL.bad?'bad':'ok'}" style="margin:8px 0 0">${esc(CL.msg)}</p>`;
+el.innerHTML=h;if(ch){ch.textContent=chip;ch.className=cc}}
+const say=(m,b)=>{CL.msg=m||'';CL.bad=b?1:0;ui()};
+const latest=async full=>{const r=await sb.from('aven_backups').select(full?'id,device,created_at,updated_at,data':'id,device,created_at,updated_at').order('updated_at',{ascending:false}).limit(1);if(r.error)throw r.error;return r.data&&r.data[0]||null};
+function apply(o,m){if(!okd(o))throw new Error('Cloud copy is not a valid Aven backup');try{localStorage.aven_prev=localStorage.aven}catch(e){}CL.applying=1;S=o;sv();CL.applying=0;const p=document.getElementById('pd');if(p)p.value=S.payday||'';render();say(m)}
+async function prune(){try{const r=await sb.from('aven_backups').select('id').order('updated_at',{ascending:false}).range(30,300);if(r.data&&r.data.length)await sb.from('aven_backups').delete().in('id',r.data.map(x=>x.id))}catch(e){}}
+async function push(force){if(!CL.user||!navigator.onLine||CL.busy||CL.conf)return;if(!CL.ready&&!force)return;CL.busy=1;const v=CL.ver;let again=0;
+try{CL.s='busy';ui();const top=await latest(false),y=gy();
+if(!force&&top&&top.device!==DEV&&Date.parse(top.updated_at)>Date.parse(y.seen||0)){CL.busy=0;CL.ready=0;return reconcile()}
+const body={device:DEV,data:JSON.parse(JSON.stringify(S))},sameDay=!force&&top&&top.device===DEV&&iso(new Date(top.created_at))==today();let r;
+if(sameDay){r=await sb.from('aven_backups').update(body).eq('id',top.id).select('id,updated_at').maybeSingle();if(!r.error&&!r.data)r=await sb.from('aven_backups').insert(body).select('id,updated_at').single()}
+else r=await sb.from('aven_backups').insert(body).select('id,updated_at').single();
+if(r.error)throw r.error;const z=gy();z.seen=r.data.updated_at;z.uid=CL.user.id;if(CL.ver===v)z.dirty=0;else again=1;sy(z);CL.ready=1;CL.s=again?'pending':'ok';CL.bad=0;CL.msg=again?'':'Last backup '+tm();prune()}
+catch(e){CL.s='err';CL.bad=1;CL.msg='Backup failed ('+(e.message||e)+'). Aven will retry.';clearTimeout(RT);RT=setTimeout(()=>push(),60000)}
+finally{CL.busy=0;ui();if(again){clearTimeout(T);T=setTimeout(()=>push(),400)}}}
+async function reconcile(){if(CL.rec||!CL.user||!navigator.onLine)return;CL.rec=1;CL.ready=0;
+try{CL.s='busy';ui();const r=await latest(true),y=gy(),loc=S;
+if(!r){CL.ready=1;if(emp(loc)){CL.s='ok';CL.msg='Connected. Nothing to back up yet.'}else await push(true)}
+else if(!okd(r.data)){throw new Error('Cloud copy is not valid')}
+else if(cn(r.data)==cn(loc)){y.seen=r.updated_at;y.dirty=0;y.uid=CL.user.id;sy(y);CL.ready=1;CL.s='ok';CL.msg='Backed up and in sync'}
+else if(emp(loc)){y.seen=r.updated_at;y.dirty=0;y.uid=CL.user.id;sy(y);apply(r.data,'Restored '+r.data.tx.length+' transactions from your cloud backup.');CL.ready=1;CL.s='ok'}
+else if(r.device===DEV){CL.ready=1;await push(true)}
+else if(!y.dirty&&y.uid===CL.user.id){y.seen=r.updated_at;sy(y);apply(r.data,'Updated from your other device.');CL.ready=1;CL.s='ok'}
+else{CL.conf=r;CL.s='err'}}
+catch(e){CL.s='err';CL.bad=1;CL.msg='Could not reach the cloud ('+(e.message||e)+').'}
+finally{CL.rec=0;ui()}}
+window.cloudQ=function(){if(CL.applying)return;const y=gy();y.dirty=1;sy(y);CL.ver++;if(CL.user&&CL.ready&&!CL.conf){CL.s='pending';CL.msg='';ui();clearTimeout(T);T=setTimeout(()=>push(),2500)}else ui()};
+document.getElementById('cloud')&&document.getElementById('cloud').addEventListener('click',async e=>{const d=e.target.dataset;if(!sb)return;
+try{
+if(d.cs){const em=(document.getElementById('ce').value||'').trim().toLowerCase();if(!/^\S+@\S+\.\S+$/.test(em))return say('Please enter a valid email address.',1);CL.email=em;const r=await sb.auth.signInWithOtp({email:em,options:{shouldCreateUser:true}});if(r.error)return say(r.error.message,1);CL.sent=1;say('Code sent. Check your inbox (and spam folder).')}
+else if(d.cv){const tk=(document.getElementById('cc').value||'').replace(/\s/g,'');if(!tk)return say('Enter the code from your email.',1);const r=await sb.auth.verifyOtp({email:CL.email,token:tk,type:'email'});if(r.error)return say(r.error.message,1);say('Signed in.')}
+else if(d.so){await sb.auth.signOut();CL.user=null;CL.ready=0;CL.sent=0;CL.snaps=null;CL.conf=null;say('Signed out. Your data stays on this phone.')}
+else if(d.bn){CL.msg='';await push()}
+else if(d.rl){const r=await sb.from('aven_backups').select('id,updated_at').order('updated_at',{ascending:false}).limit(30);if(r.error)throw r.error;CL.snaps=r.data;CL.rrc=0;ui()}
+else if(d.rr){if(!CL.rrc){CL.rrc=1;CL.sel=document.getElementById('cs').value;return ui()}CL.sel=document.getElementById('cs').value;const id=Number(document.getElementById('cs').value),r=await sb.from('aven_backups').select('data,updated_at').eq('id',id).single();if(r.error)throw r.error;const top=await latest(false),y=gy();y.seen=top?top.updated_at:'';y.uid=CL.user.id;sy(y);CL.rrc=0;CL.snaps=null;CL.sel=null;CL.ready=1;apply(r.data.data,'Restored the snapshot from '+dt(r.data.updated_at)+'.');const z=gy();z.dirty=1;sy(z);CL.ver++;await push(true)}
+else if(d.cu){const r=CL.conf,y=gy();y.seen=r.updated_at;y.dirty=0;y.uid=CL.user.id;sy(y);CL.conf=null;CL.ready=1;apply(r.data,'Now using your cloud copy.');CL.s='ok'}
+else if(d.ck){try{localStorage.aven_prev=localStorage.aven}catch(x){}CL.conf=null;CL.ready=1;await push(true);if(CL.s=='ok')CL.msg='This phone’s data is now your latest cloud backup.'}
+}catch(x){CL.s='err';CL.bad=1;CL.msg=(x.message||String(x));ui()}});
+window.addEventListener('online',()=>{if(!CL.user)return;gy().dirty||!CL.ready?reconcile():0;if(CL.ready&&gy().dirty)push()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&CL.user&&CL.ready&&gy().dirty)push()});
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+if(cfgOk&&libOk){sb=window.supabase.createClient(cfg.url,cfg.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+sb.auth.onAuthStateChange((ev,sess)=>{const u=sess&&sess.user||null,was=CL.user&&CL.user.id;CL.user=u;if(u){if(was!==u.id)setTimeout(reconcile,0);else ui()}else{CL.ready=0;ui()}})}
+ui();
+})();
+</script>
+</body></html>
